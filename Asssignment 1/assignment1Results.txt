@@ -1,0 +1,100 @@
+DROP TABLE
+DROP TABLE
+DROP TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ sid | rating 
+-----+--------
+  22 |      7
+  29 |      1
+  31 |      8
+  32 |      8
+  58 |     10
+  64 |      7
+  71 |     10
+  74 |      9
+  85 |      3
+  95 |      3
+(10 rows)
+
+   bname   
+-----------
+ Interlake
+ Marine
+(2 rows)
+
+ color 
+-------
+ blue
+ red
+ green
+ red
+(4 rows)
+
+  sname  
+---------
+ Dustin
+ Horatio
+ Lubber
+(3 rows)
+
+   bname   
+-----------
+ Clipper
+ Interlake
+ Marine
+(3 rows)
+
+  sname  
+---------
+ Horatio
+ Dustin
+(2 rows)
+
+   bname   
+-----------
+ Clipper
+ Interlake
+ Interlake
+(3 rows)
+
+ bid 
+-----
+(0 rows)
+
+   bname   
+-----------
+ Interlake
+ Interlake
+ Clipper
+(3 rows)
+
+ sid 
+-----
+  74
+(1 row)
+
