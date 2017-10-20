@@ -335,3 +335,16 @@ SELECT DISTINCT BS.BookNo
 FROM book_students BS
 WHERE NOT EXISTS(SELECT S.Sid FROM Student S, student_majors SM
 WHERE memberof(S.Sid, BS.students) AND S.Sid = SM.Sid AND memberof('CS', SM.Major));
+
+\echo '3) I) Find the Bookno of each book that was not bought by all students who majors in Anthropology.'
+
+SELECT DISTINCT BS.BookNo
+FROM book_students BS
+WHERE NOT EXISTS(SELECT S.Sid FROM Student S, student_majors SM
+WHERE memberof(S.Sid, BS.students) AND S.Sid = SM.Sid AND memberof('Anthropology', SM.Major)) ORDER BY BookNo;
+
+\echo '3) J) Find sid-bookno pairs (s, b) such that not all books bought by student s are books that cite book b.'
+/*
+SELECT SB.Sid, BC.BookNo
+FROM student_books SB, book_citedbooks BC
+WHERE NOT EXISTS(SELECT ) */
