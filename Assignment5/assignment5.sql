@@ -209,3 +209,19 @@ $$
     SELECT ARRAY((SELECT * FROM Aset) EXCEPT (SELECT * FROM Bset) ORDER BY 1);
 $$ LANGUAGE SQL;
 
+create or replace function memberof(x anyelement, S anyarray) returns boolean as
+$$
+select x = SOME(S)
+$$ language sql;
+
+
+create or replace view student_books as
+select s.sid, array(select t.bookno
+from buys t
+where t.sid = s.sid order by bookno) as books
+from student s order by sid;
+
+
+
+\echo '2) A) Define a view book students(bookno,students) which associates with each book the set of students who bought that book. Observe
+that there may be books that are not bought by any student.'
