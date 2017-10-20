@@ -284,3 +284,54 @@ SELECT * FROM student_majors;
 SELECT DISTINCT B.BookNo
 FROM Book B, book_citingbooks BC
 WHERE B.Price < 50 AND CARDINALITY(BC.citingbooks) > 1 AND B.BookNo = BC.BookNo ORDER BY BookNo;
+
+\echo '3) B) Find the bookno and title of each book that was bought by a student who majors in CS and in Math.'
+
+SELECT DISTINCT B.BookNo, B.Title
+FROM Book B, book_students BS, student_majors SM
+WHERE B.BookNo = BS.BookNo AND memberof(SM.Sid, BS.students) AND memberof('Math', SM.Major) AND memberof('CS', SM.Major) ORDER BY BookNo;
+
+\echo '3) C)  Find the bookno of each book that is cited by exactly one book.'
+
+SELECT B.BookNo
+FROM Book B, book_citingbooks BC
+WHERE B.BookNo = BC.BookNo AND CARDINALITY(BC.citingbooks) = 1 ORDER BY BookNo;
+
+\echo '3) D) Find the sid of each student who bought all books that cost more than $50.'
+
+SELECT DISTINCT SB.Sid
+FROM student_books SB
+WHERE CARDINALITY(setdifference(SB.books, ARRAY(SELECT B.BookNo FROM Book B WHERE B.Price > 50))) = 0 
+AND CARDINALITY(setdifference(ARRAY(SELECT B.BookNo FROM Book B WHERE B.Price > 50), SB.books)) = 0;
+
+\echo '3) E) Find the sid of each student who bought no book that cost more than $50.'
+
+SELECT DISTINCT SB.Sid
+FROM student_books SB
+WHERE NOT EXISTS(SELECT B.BookNo FROM Book B
+WHERE memberof(B.BookNo, SB.books) AND B.Price > 50);
+
+/* CARDINALITY(setdifference(SB.books, ARRAY(SELECT B.BookNo FROM Book B WHERE B.Price > 50))) > 0
+AND CARDINALITY(setdifference(SB.books, ARRAY(SELECT B.BookNo FROM Book B WHERE B.Price < 50))) > 0; */
+
+\echo '3) F) Find the sid of each student who bought only books that cost more than $50'
+
+SELECT SB.Sid
+FROM student_books SB
+WHERE NOT EXISTS(SELECT B.BookNo
+FROM Book B
+WHERE memberof(B.BookNo, SB.books) AND B.Price <= 50);
+
+\echo '3) G) Find the sid of each students who bought exactly one book that cost less than $50.'
+
+SELECT SB.Sid, S.Sname
+FROM student_books SB, Student S
+WHERE CARDINALITY(ARRAY(SELECT B.BookNo FROM Book B WHERE memberof(B.BookNo, SB.books) AND B.Price < 50)) = 1
+AND S.Sid = SB.Sid ORDER BY Sid;
+
+\echo '3) H) Find the bookno of each book that was not bought by any students who majors in CS.'
+
+SELECT DISTINCT BS.BookNo
+FROM book_students BS
+WHERE NOT EXISTS(SELECT S.Sid FROM Student S, student_majors SM
+WHERE memberof(S.Sid, BS.students) AND S.Sid = SM.Sid AND memberof('CS', SM.Major));
