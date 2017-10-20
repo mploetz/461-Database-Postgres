@@ -221,7 +221,66 @@ from buys t
 where t.sid = s.sid order by bookno) as books
 from student s order by sid;
 
+SELECT * FROM student_books;
 
+\echo '2) A) Define a view book_students(bookno,students) which associates with each book the set of students who bought that book. Observe that there may be books that are not bought by any student.'
 
-\echo '2) A) Define a view book students(bookno,students) which associates with each book the set of students who bought that book. Observe
-that there may be books that are not bought by any student.'
+CREATE OR REPLACE VIEW book_students AS
+SELECT B.BookNo, ARRAY(SELECT By.Sid 
+FROM Buys By
+WHERE By.BookNo = B.BookNo ORDER BY Sid) AS students
+FROM Book B ORDER BY BookNo;
+
+SELECT * FROM book_students;
+
+\echo '2) B)Define a view book_citedbooks(bookno,citedbooks) which associates with each book the set of books that are cited by that book.'
+\echo 'Observe that there may be books that cite no books.'
+
+CREATE OR REPLACE VIEW book_citedbooks AS
+SELECT B.BookNo, ARRAY(SELECT C.CitedBookNo
+FROM Cites C 
+WHERE C.BookNo = B.BookNo ORDER BY CitedBookNo) AS CitedBooks
+FROM Book B ORDER BY BookNo;
+
+SELECT * FROM book_citedbooks;
+
+\echo '2) C) Define a view book citingbooks(bookno,citingbooks) which associates'
+\echo 'with each book the set of books that cites that book. Observe'
+\echo 'that there may be books that are not cited.'
+
+CREATE OR REPLACE VIEW book_citingbooks AS
+SELECT B.BookNo, ARRAY(SELECT C.BookNo 
+FROM Cites C
+WHERE C.CitedBookNo = B.BookNo ORDER BY CitedBookNo) AS citingbooks
+FROM Book B ORDER BY BookNo;
+
+SELECT * FROM book_citingbooks;
+
+\echo '2) D) Define a view major_students(major,students) which associates'
+\echo 'with each major the set of students who have that major.'
+
+CREATE OR REPLACE VIEW major_students AS
+SELECT DISTINCT M.Major, ARRAY(SELECT S.Sid
+FROM Student S
+WHERE S.Sid IN (SELECT M2.Sid FROM Major M2 WHERE M2.Major = M.Major) ORDER BY Sid) AS students
+FROM Major M ORDER BY Major;
+
+SELECT * FROM major_students;
+
+\echo '2) E) Define a view student majors(sid,majors) which associates with'
+\echo 'each student the set of his or her majors. Observe that there can be'
+\echo 'students who have no major'
+
+CREATE OR REPLACE VIEW student_majors AS
+SELECT S.Sid, ARRAY(SELECT DISTINCT M.Major
+FROM Major M
+WHERE M.Major IN (SELECT M2.Major FROM Major M2 WHERE M2.Sid = S.Sid) ORDER BY Major) AS major
+FROM Student S ORDER BY Sid;
+
+SELECT * FROM student_majors;
+
+\echo '3) A) Find the bookno of each book that is cited by at least two books that cost less than $50.'
+
+SELECT DISTINCT B.BookNo
+FROM Book B, book_citingbooks BC
+WHERE B.Price < 50 AND CARDINALITY(BC.citingbooks) > 1 AND B.BookNo = BC.BookNo ORDER BY BookNo;
