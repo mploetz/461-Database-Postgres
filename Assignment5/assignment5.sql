@@ -291,11 +291,11 @@ SELECT DISTINCT B.BookNo, B.Title
 FROM Book B, book_students BS, student_majors SM
 WHERE B.BookNo = BS.BookNo AND memberof(SM.Sid, BS.students) AND memberof('Math', SM.Major) AND memberof('CS', SM.Major) ORDER BY BookNo;
 
-\echo '3) C)  Find the bookno of each book that is cited by exactly one book.'
+\echo '3) C) Find the bookno of each book that is cited by exactly one book.'
 
-SELECT B.BookNo
-FROM Book B, book_citingbooks BC
-WHERE B.BookNo = BC.BookNo AND CARDINALITY(BC.citingbooks) = 1 ORDER BY BookNo;
+SELECT BC.BookNo
+FROM book_citingbooks BC
+WHERE CARDINALITY(BC.citingbooks) = 1 ORDER BY BookNo;
 
 \echo '3) D) Find the sid of each student who bought all books that cost more than $50.'
 
@@ -348,3 +348,34 @@ WHERE memberof(S.Sid, BS.students) AND S.Sid = SM.Sid AND memberof('Anthropology
 SELECT SB.Sid, BC.BookNo
 FROM student_books SB, book_citedbooks BC
 WHERE NOT EXISTS(SELECT ) */
+
+SELECT SB.Sid, BC.BookNo
+FROM student_books SB, book_citingbooks BC
+WHERE CARDINALITY(setdifference(SB.books, BC.citingbooks)) > 0;
+
+\echo '3) K) Find sid-bookno pairs (s, b) such student s only bought books that cite book b.'
+
+SELECT SB.Sid, BC.BookNo
+FROM student_books SB, book_citingbooks BC
+WHERE CARDINALITY(setdifference(SB.books, BC.citingbooks)) = 0;
+
+\echo '3) L)  Find the pairs (s1, s2) of different sids of students that buy the same books.'
+
+SELECT SB.Sid AS s1, SB2.Sid AS s2
+FROM student_books SB, student_books SB2
+WHERE CARDINALITY(setdifference(SB.books, SB2.books)) = 0 AND
+CARDINALITY(setdifference(SB2.books, SB.books)) = 0 AND
+SB.Sid != SB2.Sid;
+
+\echo '3) M) Find the pairs (s1, s2) of different sids of students that buy the same number of books.'
+
+SELECT SB.Sid, SB2.Sid
+FROM student_books SB, student_books SB2
+WHERE CARDINALITY(SB.books) = CARDINALITY(SB2.books) AND SB.Sid != SB2.Sid;
+
+\echo '3) N) Find the bookno of each book that cites all but two books.'
+
+SELECT DISTINCT CB.BookNo
+FROM book_citingbooks BC, book_citedbooks CB
+WHERE CARDINALITY(setintersection(BC.citingbooks, CB.citedbooks)) = 2
+AND CARDINALITY(setintersection(CB.citedbooks, BC.citingbooks)) = 2;
