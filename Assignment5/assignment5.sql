@@ -377,5 +377,4 @@ WHERE CARDINALITY(SB.books) = CARDINALITY(SB2.books) AND SB.Sid != SB2.Sid;
 
 SELECT DISTINCT CB.BookNo
 FROM book_citingbooks BC, book_citedbooks CB
-WHERE CARDINALITY(setintersection(BC.citingbooks, CB.citedbooks)) = 2
-AND CARDINALITY(setintersection(CB.citedbooks, BC.citingbooks)) = 2;
+WHERE CARDINALITY(setintersection(BC.citingbooks, CB.citedbooks)) = 2;
