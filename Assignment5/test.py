@@ -12,3 +12,22 @@ def v2(m, r):
     return math.sqrt(ans)
 
 print(v2(2*(5.974e24), 10000000))
+
+print("\n")
+
+print((4*(math.pi**2)*350000**3)/((6.67e-11)*(3024000**2)))
+
+print("\n")
+print((math.sqrt((2*(6.67e-11)*(5.972e24))/(300000000)))/1000)
+
+print("\n")
+
+print(math.sqrt(2*9.8*1000))
+
+print("\n")
+
+g = 6.67e-11
+Mearth = 5.972e24
+r1 = 1/8000000
+r2 = 1/9000000
+print(g*Mearth*(r1-r2))
