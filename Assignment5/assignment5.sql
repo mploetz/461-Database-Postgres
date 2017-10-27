@@ -324,7 +324,7 @@ WHERE memberof(B.BookNo, SB.books) AND B.Price <= 50);
 
 \echo '3) G) Find the sid of each students who bought exactly one book that cost less than $50.'
 
-SELECT SB.Sid, S.Sname
+SELECT SB.Sid
 FROM student_books SB, Student S
 WHERE CARDINALITY(ARRAY(SELECT B.BookNo FROM Book B WHERE memberof(B.BookNo, SB.books) AND B.Price < 50)) = 1
 AND S.Sid = SB.Sid ORDER BY Sid;

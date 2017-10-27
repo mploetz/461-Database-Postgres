@@ -346,12 +346,12 @@ CREATE VIEW
  1023
 (5 rows)
 
- sid  | sname 
-------+-------
- 1011 | Nick
- 1013 | Lisa
- 1020 | Ahmed
- 1040 | Sofie
+ sid  
+------
+ 1011
+ 1013
+ 1020
+ 1040
 (4 rows)
 
  bookno 
