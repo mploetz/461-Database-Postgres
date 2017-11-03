@@ -16,7 +16,9 @@
     S.Sname=<rprime|'>Eric<rprime|'> AND b1.BookNo!=2010><around*|(|S\<times\>B1\<times\>B2|)>|)>
   </math>
 
-  B) SELECT DISTINCT b.bookno, b.title FROM book b, student s WHERE b.price =
+  B)\ 
+
+  SELECT DISTINCT b.bookno, b.title FROM book b, student s WHERE b.price =
   SOME(select b1.price from buys t, book b1 where b1.price \<gtr\> 50 and
   s.sid = t.sid and t.bookno = b1.bookno);
 
@@ -44,8 +46,9 @@
 
   <math|\<pi\><rsub|B.BookNo,B.Title><around*|(||\<nobracket\>>>
 
-  <math|<around*|(|S\<times\>B|)>\<ltimes\><around*|(|\<pi\><rsub|S1.Sname,S1.Sid><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50
-  AND S1.Sid=T.Sid AND T.BookNo=B1.BookNo><around*|(|T\<times\>B1\<times\>S1|)>|)>|)>>)
+  <math|<around*|(|S\<times\>B|)>\<ltimes\><rsub|B.Price=B1.Price><around*|(|\<pi\><rsub|B2.Price><around*|(|\<pi\><rsub|S1.Sname,S1.Sid><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50
+  AND S1.Sid=T.Sid AND T.BookNo=B1.BookNo and B2.Price=B1.Price>
+  <around*|(|T\<times\>B1\<times\>S1\<times\>B2|)>|)>|)>|)>>)
 
   C)
 
@@ -178,103 +181,6 @@
   EXISTS (SELECT t2.bookno\nFROM Buys t2\nWHERE t2.sid = s2.sid and t1.bookno
   = t2.bookno));
 
-  SELECT s1.sid, s2.sid
-
-  FROM student s1, student s2
-
-  WHERE s1.sid \<less\>\<gtr\> s2.sid AND
-
-  NOT EXISTS(SELECT 1
-
-  FROM Buys t1
-
-  WHERE t1.sid = s1.sid AND
-
-  NOT<nbsp>EXISTS(SELECT 1
-
-  FROM Buys t2
-
-  WHERE t2.sid = s2.sid AND t1.bookno=t2.bookno));
-
-  WITH<nbsp>E1 AS (SELECT t1.sid as t1sid, t1.bookno as t1bookno,
-
-  s1.sid<nbsp>as<nbsp>s1sid, s1.sname<nbsp>as<nbsp>s1sname,
-
-  s2.sid<nbsp>as<nbsp>s2sid, s2.sname<nbsp>as<nbsp>s2sname
-
-  FROM<nbsp><nbsp><nbsp>Buys t2<nbsp>CROSS<nbsp>JOIN<nbsp>Buys
-  t1<nbsp>CROSS<nbsp>JOIN<nbsp>Student s1<nbsp>CROSS<nbsp>JOIN<nbsp>Student
-  s2
-
-  WHERE<nbsp><nbsp>t2.sid = s2.sid<nbsp>AND<nbsp>t1.bookno = t2.bookno),
-
-  E2<nbsp>AS<nbsp>(SELECT<nbsp>t1.sid<nbsp>as<nbsp>t1sid,
-  t1.bookno<nbsp>as<nbsp>t1bookno,
-
-  s1.sid<nbsp>as<nbsp>s1sid, s1.sname<nbsp>as<nbsp>s1sname,
-
-  s2.sid<nbsp>as<nbsp>s2sid, s2.sname<nbsp>as<nbsp>s2sname
-
-  FROM Buys t1<nbsp>CROSS<nbsp>JOIN<nbsp>Student
-  s1<nbsp>CROSS<nbsp>JOIN<nbsp>Student s2
-
-  WHERE<nbsp><nbsp>t1.sid = s1.sid),
-
-  E2SemiJoinE1<nbsp>AS
-
-  (SELECT<nbsp>e2.t1sid, e2.t1bookno,
-
-  e2.s1sid, e2.s1sname,
-
-  e2.s2sid, e2.s2sname
-
-  FROM<nbsp><nbsp><nbsp>E2 e2<nbsp>NATURAL<nbsp>JOIN<nbsp>E1 e1),
-
-  E2antiSemiJoinE1<nbsp>AS
-
-  ((SELECT<nbsp>*
-
-  FROM<nbsp><nbsp><nbsp>E2)
-
-  EXCEPT
-
-  (SELECT<nbsp>*
-
-  FROM<nbsp>E2SemiJoinE1)),
-
-  E3<nbsp>AS<nbsp>(SELECT<nbsp>s1sid, s1sname, s2sid, s2sname
-
-  FROM<nbsp><nbsp><nbsp>E2antiSemiJoinE1),
-
-  E4<nbsp>AS<nbsp>(SELECT<nbsp>s1.sid<nbsp>as<nbsp>s1sid,
-  s1.sname<nbsp>as<nbsp>s1sname,
-
-  s2.sid<nbsp>as<nbsp>s2sid, s2.sname<nbsp>as<nbsp>s2sname
-
-  FROM<nbsp><nbsp><nbsp>Student s1<nbsp>CROSS<nbsp>JOIN<nbsp>Student s2
-
-  WHERE<nbsp><nbsp>s1.sid \<less\>\<gtr\> s2.sid),
-
-  E4SemiJoinE3<nbsp>AS
-
-  (SELECT<nbsp>e4.s1sid, e4.s1sname,
-
-  e4.s2sid, e4.s2sname
-
-  FROM<nbsp>E4 e4<nbsp>NATURAL<nbsp>JOIN<nbsp>E3 e3),
-
-  E4 antiSemiJoinE3<nbsp>AS
-
-  ((SELECT *FROM E4)
-
-  EXCEPT
-
-  (SELECT * FROM<nbsp>E4SemiJoinE3))
-
-  SELECT<nbsp>distinct<nbsp>s1sid, s2sid
-
-  FROM<nbsp><nbsp><nbsp>E4antiSemiJoinE3;
-
   <math|T1<wide|\<ltimes\>|\<bar\>>\<pi\><rsub|t2.BookNo><around*|(|\<sigma\><rsub|t2.Sid=S2.Sid
   and t1.BookNo=t2.BookNo><around*|(|T2|)>|)>>
 
@@ -296,6 +202,71 @@
   <section|>
 
   A)
+
+  <\math>
+    \<pi\><rsub|S.Sid,B1.BookNo><around*|(|\<sigma\><rsub|S.Sid=b1.Sid AND
+    S.Sid=B2.Sid AND B1.BookNo !=B2.BookNo AND
+    S.Sname=<rprime|'>Eric<rprime|'> AND b1.BookNo!=2010><around*|(|S\<times\>B1\<times\>B2|)>|)>
+  </math>
+
+  <math|\<longrightarrow\>>
+
+  Take out cross of buys and join them
+
+  <math|\<pi\><rsub|B1.Sid,B1.BookNo><around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
+  and B1.Sid=B2.Sid><around*|(|B2|)><rsub|>>
+
+  <\math>
+    \<longrightarrow\>
+  </math>
+
+  <math|\<pi\><rsub|S.Sid,B1.BookNo><around*|(|\<sigma\><rsub|S.Sname=<rprime|'>Eric<rprime|'>><around*|(|S|)>|)>>
+
+  <\math>
+    \<longrightarrow\>
+  </math>
+
+  <\math>
+    \<pi\><rsub|S.Sid,B1.BookNo><around*|(|\<sigma\><rsub|S.Sname=<rprime|'>Eric<rprime|'>><around*|(|S|)>|)>\<ltimes\><rsub|S.Sid=B1.Sid
+    and S.Sid=B2.Sid>\<pi\><rsub|B1.Sid,B1.BookNo>
+
+    <around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
+    and B1.Sid=B2.Sid><around*|(|B2|)><rsub|>
+  </math>
+
+  B)
+
+  <math|\<pi\><rsub|B.BookNo,B.Title><around*|(||\<nobracket\>>>
+
+  <math|<around*|(|S\<times\>B|)>\<ltimes\><rsub|B.Price=B1.Price><around*|(|\<pi\><rsub|B2.Price><around*|(|\<pi\><rsub|S1.Sname,S1.Sid><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50
+  AND S1.Sid=T.Sid AND T.BookNo=B1.BookNo and B2.Price=B1.Price>
+  <around*|(|T\<times\>B1\<times\>S1\<times\>B2|)>|)>|)>|)>>)
+
+  <math|\<longrightarrow\>>
+
+  Pull out books
+
+  <math|\<pi\><rsub|B1.BookNo,B1.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)><rsub|>>
+
+  <math|\<pi\><rsub|T.Sid,B1.Price><around*|(|T|)>\<ltimes\><rsub|T.BookNo=B1.BookNo><around*|(|\<pi\><rsub|B1.Price,B1.BookNo><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)>|)>>
+
+  <math|\<longrightarrow\>>
+
+  Combine B1,T and S1
+
+  <\math>
+    \<pi\><rsub|B1.Price><around*|(|\<sigma\><rsub|S1.Sid><around*|(|S1|)>|)>\<ltimes\><rsub|S1.Sid=T.Sid>\<pi\><rsub|T.Sid,B1.Price><around*|(|T|)>\<ltimes\><rsub|T.BookNo=B1.BookNo><around*|(|\<pi\><rsub|B1.BookNo,B1.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)>|)>
+
+    \<longrightarrow\>
+  </math>
+
+  Reducing
+
+  <math|<rsub|Same Books bought>>
+
+  <math|\<pi\><rsub|B.BookNo,B.Title><around*|(|B|)>\<ltimes\><rsub|B.Price=B1.Price><around*|(|\<pi\><rsub|B1.Price><around*|(|T|)>\<ltimes\><rsub|T.BookNo=B1.BookNo><around*|(|\<pi\><rsub|B1.BookNo,B1.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)>|)>|)>>
+
+  C)
 
   \;
 </body>
@@ -320,6 +291,10 @@
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-2><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
