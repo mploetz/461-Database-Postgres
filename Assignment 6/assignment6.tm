@@ -214,7 +214,7 @@
   Take out cross of buys and join them
 
   <math|\<pi\><rsub|B1.Sid,B1.BookNo><around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
-  and B1.Sid=B2.Sid><around*|(|B2|)><rsub|>>
+  and B1.Sid=B2.Sid>\<pi\><rsub|B2.Sid,B2.BookNo><around*|(|B2|)><rsub|>>
 
   <\math>
     \<longrightarrow\>
@@ -268,6 +268,93 @@
 
   C)
 
+  <\math>
+    \<pi\><rsub|B.BookNo>
+
+    <around*|(|B\<ltimes\><around*|(|\<pi\><rsub|B2.BookNo,B2.Price,B2.Title><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50
+    AND B2.BookNo=B1.BookNo><around*|(|B1\<times\>B2|)>|)>\<cup\><around*|(|\<pi\><rsub|C.BookNo><around*|(|C|)>|)>|)>|)>
+  </math>
+
+  <math|\<longrightarrow\>>
+
+  <\math>
+    \<pi\><rsub|B1.BookNo><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)>
+
+    \<longrightarrow\>
+
+    \<pi\><rsub|C.BookNo><around*|(|C|)>
+
+    \<longrightarrow\>
+
+    Reducing to less Union
+
+    \<pi\><rsub|B.BookNo><around*|(|\<pi\><rsub|B1.BookNo><around*|(|\<sigma\><rsub|B1.Price\<gtr\>50><around*|(|B1|)>|)>\<cup\>\<pi\><rsub|C.BookNo><around*|(|C|)>|)>
+  </math>
+
+  D)
+
+  <\math>
+    \<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80
+    \ ><around*|(|B|)>|)>-
+
+    <around*|(|\<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80>|)>|(>B\<ltimes\><around*|(|\<pi\><rsub|B2.BookNo,B2.Title,B2.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>B2.Price><around*|(|B2\<times\>B1|)>|)>|)>
+
+    \<longrightarrow\>
+
+    \<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80
+    \ ><around*|(|B|)>|)>\<cap\><around*|(|\<pi\><rsub|B2.BookNo,B2.Title,B2.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>B2.Price><around*|(|B2\<times\>B1|)>|)>|)>
+
+    \<longrightarrow\>
+
+    \<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80
+    \ ><around*|(|B|)>|)>-
+  </math>
+
+  <\math>
+    \<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80
+    \ ><around*|(|B|)>|)>\<cap\><around*|(|\<pi\><rsub|B2.BookNo,B2.Title,B2.Price><around*|(|\<sigma\><rsub|B1.Price\<gtr\>B2.Price><around*|(|B2\<times\>B1|)>|)>|)>
+
+    \<longrightarrow\>
+
+    Which is same as saying \<varnothing\>\<cup\>\<cal-E\> so we can say
+
+    \<pi\><rsub|B.BookNo><around*|(|\<sigma\><rsub|B.Price\<geq\>80
+    \ ><around*|(|B|)>|)>-
+
+    \<pi\><rsub|B2.BookNo><around*|(|B1|)>\<ltimes\><rsub|B1.Price\<gtr\>B2.Price><around*|(|B2|)>
+  </math>
+
+  \;
+
+  <section|>
+
+  A)
+
+  <\math>
+    \<pi\><rsub|S.Sid,B1.BookNo><around*|(|\<sigma\><rsub|S.Sname=<rprime|'>Eric<rprime|'>><around*|(|S|)><rsub|E3>|)>\<ltimes\><rsub|S.Sid=B1.Sid
+    and S.Sid=B2.Sid<rsub|E4>>\<pi\><rsub|B1.Sid,B1.BookNo>
+
+    <around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)><rsub|E1>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
+    and B1.Sid=B2.Sid><around*|(|B2|)><rsub|E2><rsub|>
+  </math>
+
+  \;
+
+  WITH
+
+  E1 AS (SELECT S.Sid FROM Student S WHERE S.Sname = 'Eric'),
+
+  E2 AS (SELECT B1.BookNo, B1.Sid FROM Buys B1 WHERE B1.BookNo != '2010'),
+
+  E3 AS (SELECT E2.BookNo,E2.Sid FROM E2 INNER JOIN Buys B ON (E2.Sid = B.Sid
+  AND
+
+  E2.BookNo != B.BookNo)),
+
+  E4 AS (SELECT E3.Sid, E3.BookNo FROM E3 INNER JOIN E3 ON (E3.Sid = E1.Sid))
+
+  SELECT * FROM E4;
+
   \;
 </body>
 
@@ -282,6 +369,7 @@
   <\collection>
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|2|?>>
+    <associate|auto-3|<tuple|3|?>>
   </collection>
 </references>
 
