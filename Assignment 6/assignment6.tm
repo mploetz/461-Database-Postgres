@@ -231,7 +231,7 @@
     and S.Sid=B2.Sid>\<pi\><rsub|B1.Sid,B1.BookNo>
 
     <around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
-    and B1.Sid=B2.Sid><around*|(|B2|)><rsub|>
+    and B1.Sid=B2.Sid>\<pi\><rsub|B2.Sid,B2.BookNo><around*|(|B2|)><rsub|>
   </math>
 
   B)
@@ -373,6 +373,10 @@
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
