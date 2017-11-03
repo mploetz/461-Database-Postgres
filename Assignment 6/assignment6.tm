@@ -330,16 +330,6 @@
 
   A)
 
-  <\math>
-    \<pi\><rsub|S.Sid,B1.BookNo><around*|(|\<sigma\><rsub|S.Sname=<rprime|'>Eric<rprime|'>><around*|(|S|)><rsub|E3>|)>\<ltimes\><rsub|S.Sid=B1.Sid
-    and S.Sid=B2.Sid<rsub|E4>>\<pi\><rsub|B1.Sid,B1.BookNo>
-
-    <around*|(|\<sigma\><rsub|B1.BookNo!=<rprime|'>2010<rprime|'>><around*|(|B1|)><rsub|E1>|)>\<ltimes\><rsub|B1.BookNo!=B2.BookNo
-    and B1.Sid=B2.Sid><around*|(|B2|)><rsub|E2><rsub|>
-  </math>
-
-  \;
-
   WITH
 
   E1 AS (SELECT S.Sid FROM Student S WHERE S.Sname = 'Eric'),
