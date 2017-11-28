@@ -50,6 +50,44 @@ drop table if exists artPointsRes;
 create table artPointsRes(points INTEGER);
 
 
+
+CREATE OR REPLACE FUNCTION articulation() RETURNS VOID AS
+$$
+  DECLARE
+    edge          RECORD;
+    edgesRemoved INTEGER;
+    counter  INTEGER;
+    edgeCount    INTEGER;
+  BEGIN
+    DELETE FROM artPointsRes;
+    FOR edge IN (SELECT howFarINCT * from graph)
+      LOOP
+        INSERT INTO E (SELECT * FROM graph);
+        PERFORM transitive_closure();
+        DELETE FROM TC WHERE TC.Source = edge.source OR TC.target = edge.target;
+        INSERT INTO edgesRemoved (SELECT * FROM TC);
+        DELETE FROM E WHERE E.source = edge.source OR E.target = edge.source;
+        DELETE FROM TC;
+        PERFORM transitive_closure();
+        INSERT INTO tempGraph (SELECT * FROM TC);
+        edgesRemoved := (SELECT count(*)
+                                  FROM ((SELECT * FROM edgesRemoved)
+                                        EXCEPT
+                                        (SELECT * FROM tempGraph)) AS any);
+        edgeCount := (SELECT count(*) FROM tempGraph);
+        counter := (SELECT count(*) FROM edgesRemoved);
+        IF counter > edgeCount AND edgesRemoved > 0 THEN
+          INSERT INTO artPointsRes VALUES (edge.source);
+        END IF;
+        DELETE FROM edgesRemoved;
+        DELETE FROM tempGraph;
+        DELETE FROM E;
+        DELETE FROM TC;
+      END LOOP;
+  END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION articulation()
 RETURNS TABLE (node INTEGER) AS $$
     DECLARE res INTEGER;
@@ -78,7 +116,7 @@ RETURNS TABLE (node INTEGER) AS $$
             IF countEdges > counter AND edgeNotInGraph > 0 THEN
             INSERT INTO artPointsRes VALUES (edge.source);
             END IF;
-            DELETE FROM countEdges;
+            DELETE FROM edgesRemoved;
             DELETE FROM tempGraph;
             DELETE FROM E;
             DELETE FROM TC;
@@ -90,8 +128,8 @@ select * from articulation();
 
 
 \echo '2'
-drop table if exists PC;
-create table PC (
+drop table if exists Pairs;
+create table Pairs (
     p integer,
     c integer
 );
@@ -102,26 +140,26 @@ create table ANC (
     D integer
 );
 
-drop table if exists DIST;
-create table DIST (
+drop table if exists howFar;
+create table howFar (
     y integer,
     W integer
 );
 
    
-insert into PC values(1, 2);
-insert into PC values(1, 3);
-insert into PC values(1, 4);
-insert into PC values(2, 5);
-insert into PC values(2, 6);
-insert into PC values(3, 7);
-insert into PC values(5, 8);
+insert into Pairs values(1, 2);
+insert into Pairs values(1, 3);
+insert into Pairs values(1, 4);
+insert into Pairs values(2, 5);
+insert into Pairs values(2, 6);
+insert into Pairs values(3, 7);
+insert into Pairs values(5, 8);
 
 create or replace function new_ANC_pairs()
     returns table (A integer, D integer) AS
     $$
     (select A, C
-        from ANC, PC
+        from ANC, Pairs
         where D = P)
         except
     (select A, D
@@ -136,16 +174,16 @@ declare rec record;
 begin
     drop table if exists ANC;
     create table ANC(A integer, D integer);
-    for rec in select p,c from PC
+    for rec in select p,c from Pairs
     loop
         insert into ANC values(rec.p, rec.c);
-        if (select not exists(select y from dist where y = rec.p)) then
-            select w from dist where y = rec.p into pw;
-            insert into Dist values(rec.p, 0);
+        if (select not exists(select y from howFar where y = rec.p)) then
+            select w from howFar where y = rec.p into pw;
+            insert into howFar values(rec.p, 0);
         end if;
-        if (select not exists(select y from dist where y = rec.c)) then
-            select w from dist where y = rec.p into cw;
-            insert into Dist values(rec.c, cw + 1);
+        if (select not exists(select y from howFar where y = rec.c)) then
+            select w from howFar where y = rec.p into cw;
+            insert into howFar values(rec.c, cw + 1);
         end if;
     end loop;
     while exists(select * from new_ANC_pairs())
@@ -228,10 +266,8 @@ insert into WeightedGraph values(4, 3, 3);
 insert into WeightedGraph values(3, 4, 3);
 
 CREATE OR REPLACE view makeWeightedSetView as
-    select distinct g.source as val from WeightedGraph g;
+    select howFarinct g.source as val from WeightedGraph g;
 
-
---drop FUNCTION minSpanTree();
 CREATE OR REPLACE FUNCTION minSpanTree() 
 RETURNS TABLE (source int, target int, weight int) AS $$ 
 declare curMin int := 0;
@@ -273,8 +309,7 @@ Begin
 end;
 $$ LANGUAGE plpgsql;
 
--- select * from minSpanTree();
--- select * from TempWeightedGraph;
+select * from minSpanTree();
 
 
 
