@@ -60,7 +60,7 @@ $$
     edgeCount    INTEGER;
   BEGIN
     DELETE FROM artPointsRes;
-    FOR edge IN (SELECT howFarINCT * from graph)
+    FOR edge IN (SELECT DISTINCT * from graph)
       LOOP
         INSERT INTO E (SELECT * FROM graph);
         PERFORM transitive_closure();
@@ -87,7 +87,7 @@ $$
   END;
 $$ LANGUAGE plpgsql;
 
-select articulation();
+--select articulation();
 select * from artPointsRes;
 
 
@@ -228,7 +228,7 @@ insert into WeightedGraph values(1, 2, 2);
 
 drop view if exists weightedView;
 CREATE OR REPLACE view weightedView as
-    select howFarinct g.source as val from WeightedGraph g;
+    select DISTINCT g.source as val from WeightedGraph g;
 
 CREATE OR REPLACE FUNCTION minSpanTree() 
 RETURNS TABLE (source int, target int, weight int) AS $$ 
