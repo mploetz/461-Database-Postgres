@@ -87,44 +87,8 @@ $$
   END;
 $$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION articulation()
-RETURNS TABLE (node INTEGER) AS $$
-    DECLARE res INTEGER;
-            edge record;
-            edgeNotInGraph INTEGER;
-            counter INTEGER;
-            countEdges INTEGER;
-    BEGIN
-        DELETE FROM artPointsRes;
-        FOR edge IN (SELECT * FROM graph)
-            LOOP
-            INSERT INTO E (SELECT * FROM Graph);
-            perform Transitive_Closure();
-            DELETE FROM TC WHERE TC.target = edge.target or TC.source = edge.source;    
-            INSERT INTO edgesRemoved (SELECT * FROM TC);
-            DELETE FROM E WHERE E.source = edge.source OR E.target = edge.source;
-            DELETE FROM TC;
-            PERFORM transitive_closure();
-            INSERT INTO tempGraph (SELECT * FROM TC);
-            edgeNotInGraph := (SELECT count(*)
-                                  FROM ((SELECT * FROM edgesRemoved)
-                                        EXCEPT
-                                        (SELECT * FROM tempGraph)) AS newTC);
-            counter := (SELECT count(*) FROM tempGraph);
-            countEdges := (SELECT count(*) FROM edgesRemoved);
-            IF countEdges > counter AND edgeNotInGraph > 0 THEN
-            INSERT INTO artPointsRes VALUES (edge.source);
-            END IF;
-            DELETE FROM edgesRemoved;
-            DELETE FROM tempGraph;
-            DELETE FROM E;
-            DELETE FROM TC;
-        END LOOP;
-    END;
-$$ LANGUAGE plpgsql;
-
-select * from articulation();
+select articulation();
+select * from artPointsRes;
 
 
 \echo '2'
@@ -142,8 +106,8 @@ create table ANC (
 
 drop table if exists howFar;
 create table howFar (
-    y integer,
-    W integer
+    a integer,
+    b integer
 );
 
    
@@ -169,21 +133,21 @@ $$ LANGUAGE SQL;
 create or replace function Ancestor_Descendant()
 returns void as $$
 declare rec record;
-        pw int := 0;
-        cw int := 0;
+        t1 int := 0;
+        t2 int := 0;
 begin
     drop table if exists ANC;
     create table ANC(A integer, D integer);
     for rec in select p,c from Pairs
     loop
         insert into ANC values(rec.p, rec.c);
-        if (select not exists(select y from howFar where y = rec.p)) then
-            select w from howFar where y = rec.p into pw;
+        if (select not exists(select a from howFar where a = rec.p)) then
+            select b from howFar where a = rec.p into t1;
             insert into howFar values(rec.p, 0);
         end if;
-        if (select not exists(select y from howFar where y = rec.c)) then
-            select w from howFar where y = rec.p into cw;
-            insert into howFar values(rec.c, cw + 1);
+        if (select not exists(select a from howFar where a = rec.c)) then
+            select b from howFar where a = rec.p into t2;
+            insert into howFar values(rec.c, t2 + 1);
         end if;
     end loop;
     while exists(select * from new_ANC_pairs())
@@ -201,28 +165,29 @@ insert into A values(1);
 insert into A values(2);
 insert into A values(3);
 insert into A values(4);
+insert into A values(5);
 
-drop table if exists powerSetRelation;
-create table powerSetRelation(x INTEGER[]);
+drop table if exists PS;
+create table PS(x INTEGER[]);
 
-CREATE OR REPLACE FUNCTION powerset(subset int[]) 
+CREATE OR REPLACE FUNCTION powerset(arr int[]) 
 returns setof int[][] AS $$
-    declare tempSet int [];
+    declare templs int [];
             val int;
-            subval int [];
             emptyset int [] := '{}';
-            setofsets int [][];
+            v2 int [];
+            lss int [][];
   	begin
-        insert into powerSetRelation values(emptyset);
-    	for val in select unnest(subset)
+        insert into PS values(emptyset);
+    	for val in select unnest(arr)
     	LOOP
-            select x from powerSetRelation into setofsets;
-    	    for subval in select x from powerSetRelation LOOP
-                tempSet := array_append(subval, val); 
-                insert into powerSetRelation values(tempSet);
+            select x from PS into lss;
+    	    for v2 in select x from PS LOOP
+                templs := array_append(v2, val); 
+                insert into PS values(templs);
             end loop;
  	    END LOOP;
-    return query(select x from powerSetRelation order by cardinality(x), x);
+    return query(select x from PS order by cardinality(x), x);
     end;
 $$ LANGUAGE plpgsql;
 
@@ -231,7 +196,7 @@ $$ LANGUAGE plpgsql;
 
 \echo '4'
 
-drop view if exists makeWeightedSetView;
+
 drop table if exists WeightedGraph;
 create table WeightedGraph (
     source integer,
@@ -239,8 +204,8 @@ create table WeightedGraph (
     weight integer
 );
 
-drop table if exists Forest;
-create table Forest (
+drop table if exists allNodeTree;
+create table allNodeTree (
     tree integer
 );
 
@@ -252,56 +217,49 @@ create table TempWeightedGraph (
 );
 
 
-insert into WeightedGraph values(5, 0, 2);
-insert into WeightedGraph values(5, 5, 2);
-insert into WeightedGraph values(0, 1, 1);
-insert into WeightedGraph values(1, 0, 1);
-insert into WeightedGraph values(1, 2, 2);
-insert into WeightedGraph values(2, 1, 2);
-insert into WeightedGraph values(2, 3, 1);
-insert into WeightedGraph values(3, 2, 1);
-insert into WeightedGraph values(2, 4, 4);
-insert into WeightedGraph values(4, 2, 4);
-insert into WeightedGraph values(4, 3, 3);
-insert into WeightedGraph values(3, 4, 3);
 
-CREATE OR REPLACE view makeWeightedSetView as
+insert into WeightedGraph values(5, 2, 3);
+insert into WeightedGraph values(0, 1, 1);
+insert into WeightedGraph values(1, 0, 4);
+insert into WeightedGraph values(2, 1, 2);
+insert into WeightedGraph values(5, 1, 3);
+insert into WeightedGraph values(5, 0, 2);
+insert into WeightedGraph values(1, 2, 2);
+
+drop view if exists weightedView;
+CREATE OR REPLACE view weightedView as
     select howFarinct g.source as val from WeightedGraph g;
 
 CREATE OR REPLACE FUNCTION minSpanTree() 
 RETURNS TABLE (source int, target int, weight int) AS $$ 
-declare curMin int := 0;
-        actMin int := 100000;
+declare current int := 0;
+        mini int := 100000;
         node int;
-        tempSize int;
-        iter int;
-        neighb WeightedGraph%rowtype;
-        curSource int;
-        curTarget int;
+        neighbor WeightedGraph%rowtype;
+        currentS int;
+        currentT int;
 Begin
-    for node in select * from makeWeightedSetView
+    for node in select * from weightedView
     LOOP
-        if (select not exists(select tree from forest where tree = node)) then
-            for neighb in select * 
-                            from WeightedGraph mws
-                            where mws.target = neighb.source --and neighb.source <> mws.source
+        if (select not exists(select tree from allNodeTree where tree = node)) then
+            for neighbor in select * 
+                            from WeightedGraph wg
+                            where wg.target = neighbor.source
             LOOP
-            raise notice '%', neighb.source;
-
-                if (select not exists(select tree from forest where tree = neighb.source)) then
-                    curmin := neighb.weight;
-                    if (curmin < actMin) THEN
-                        actMin := curmin;
-                        curSource := neighb.source;
+                if (select not exists(select tree from allNodeTree where tree = neighbor.source)) then
+                    current := neighbor.weight;
+                    if (current < mini) THEN
+                        mini := current;
+                        currentS := neighbor.source;
                     end if;
                 end if;
-                insert into Forest values(curSource);
-                curTarget := (select * 
-                            from makeWeightedSetView mws
-                            where mws.val = neighb
-                                and weight = actMin);
-                insert into TempWeightedGraph values(node, curTarget, actMin);
-                actMin := 10000;
+                insert into allNodeTree values(currentS);
+                currentT := (select * 
+                            from weightedView wg
+                            where wg.val = neighbor
+                                and weight = mini);
+                insert into TempWeightedGraph values(node, currentT, mini);
+                mini := 99999;
             END LOOP;
         end if;
     END LOOP;
