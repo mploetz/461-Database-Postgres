@@ -95,7 +95,7 @@ select * from artPointsRes;
 drop table if exists Pairs;
 create table Pairs (
     p integer,
-    c integer
+    p2 integer
 );
 
 drop table if exists ANC;
@@ -112,12 +112,12 @@ create table howFar (
 
    
 insert into Pairs values(1, 2);
-insert into Pairs values(1, 3);
-insert into Pairs values(1, 4);
-insert into Pairs values(2, 5);
-insert into Pairs values(2, 6);
-insert into Pairs values(3, 7);
-insert into Pairs values(5, 8);
+insert into Pairs values(2, 3);
+insert into Pairs values(3, 4);
+insert into Pairs values(5, 5);
+insert into Pairs values(5, 6);
+insert into Pairs values(2, 7);
+insert into Pairs values(1, 8);
 
 create or replace function new_ANC_pairs()
     returns table (A integer, D integer) AS
@@ -138,16 +138,16 @@ declare rec record;
 begin
     drop table if exists ANC;
     create table ANC(A integer, D integer);
-    for rec in select p,c from Pairs
+    for rec in select p,p2 from Pairs
     loop
-        insert into ANC values(rec.p, rec.c);
+        insert into ANC values(rec.p, rec.p2);
         if (select not exists(select a from howFar where a = rec.p)) then
             select b from howFar where a = rec.p into t1;
             insert into howFar values(rec.p, 0);
         end if;
-        if (select not exists(select a from howFar where a = rec.c)) then
+        if (select not exists(select a from howFar where a = rec.p2)) then
             select b from howFar where a = rec.p into t2;
-            insert into howFar values(rec.c, t2 + 1);
+            insert into howFar values(rec.p2, t2 + 1);
         end if;
     end loop;
     while exists(select * from new_ANC_pairs())
