@@ -1,23 +1,6 @@
-/* 1) Graph(source INTEGER, target INTEGER) */
 drop table CASCADE if exists Graph;
-drop table CASCADE if EXISTS backupgraph;
 CREATE TABLE Graph(Source INTEGER, Target INTEGER);
-CREATE TABLE backupgraph(Source INTEGER, Target INTEGER);
 
--- insert into graph values(5, 0);
--- insert into graph values(0, 5);
--- insert into graph values(0, 1);
--- insert into graph values(1, 0);
--- insert into graph values(1, 2);
--- insert into graph values(2, 1);
--- insert into graph values(1, 3);
--- insert into graph values(3, 1);
--- insert into graph values(2, 3);
--- insert into graph values(3, 2);
--- insert into graph values(3, 4);
--- insert into graph values(4, 3);
--- insert into graph values(2, 4);
--- insert into graph values(4, 2);
 insert into Graph values(5, 0);
 insert into Graph values(0, 1);
 insert into Graph values(1, 3);
@@ -26,53 +9,7 @@ insert into Graph values(2, 3);
 insert into Graph values(2, 4);
 insert into Graph values(4, 3);
 
-\echo '1 \n'
-drop view if exists makesetView;
-CREATE OR REPLACE view makesetView as
-    (select distinct g.source as val from Graph g)
-    union
-    (select distinct g.target as val from Graph g);
-
-
-
-drop table if exists ArtTable;
-create table ArtTable (
-    val integer
-);
-
-create or replace function new_TC_pairs()
-returns table (source integer, target integer) AS
-$$
-    (select TC.source, Graph.target
-    from TC, Graph
-    where TC.target = Graph.source)
-    except
-    (select source, target
-    from TC);
-$$ LANGUAGE SQL;
-
-create or replace function Transitive_Closure()
-returns void as $$
-    begin
-    drop table if exists TC;
-    create table TC(source integer, target integer);
-    insert into TC select * from Graph;
-        while exists(select * from new_TC_pairs())
-        loop
-           insert into TC select * from new_TC_pairs();
-        end loop;
-    end;
-$$ language plpgsql;
-
-
-
-create table ogGraph(source integer, target integer);
-create table tempGraph(source integer, target integer);
-create table TC2(source integer, target integer);
-
-
-
-
+\echo '1'
 drop table if exists TC;
 create table TC(source integer, target integer);
 drop table if exists E;
@@ -118,7 +55,7 @@ RETURNS TABLE (node INTEGER) AS $$
     DECLARE res INTEGER;
             edge record;
             edgeNotInGraph INTEGER;
-            count INTEGER;
+            counter INTEGER;
             countEdges INTEGER;
     BEGIN
         DELETE FROM artPointsRes;
@@ -126,124 +63,33 @@ RETURNS TABLE (node INTEGER) AS $$
             LOOP
             INSERT INTO E (SELECT * FROM Graph);
             perform Transitive_Closure();
-            DELETE FROM TC WHERE TC.target = edge.target or TC.source = edge.source;
-
-
-$$
-CREATE OR REPLACE FUNCTION find_ap() RETURNS VOID AS
-$$
-  DECLARE
-    edge          RECORD;
-    not_in_except_without INTEGER;
-    not_in_count  INTEGER;
-    without_count    INTEGER;
-  BEGIN
-    DELETE FROM result;
-    FOR edge IN (SELECT DISTINCT * from graph)
-      LOOP
-        INSERT INTO E (SELECT * FROM graph);
-        PERFORM transitive_closure();
-        DELETE FROM TC WHERE TC.Source = edge.source OR TC.target = edge.target;
-        INSERT INTO edges_not_in_graph (SELECT * FROM TC);
-        DELETE FROM E WHERE E.source = edge.source OR E.target = edge.source;
-        DELETE FROM TC;
-        PERFORM transitive_closure();
-        INSERT INTO graph_without_one_vertex (SELECT * FROM TC);
-        not_in_except_without := (SELECT count(*)
-                                  FROM ((SELECT * FROM edges_not_in_graph)
+            DELETE FROM TC WHERE TC.target = edge.target or TC.source = edge.source;    
+            INSERT INTO edgesRemoved (SELECT * FROM TC);
+            DELETE FROM E WHERE E.source = edge.source OR E.target = edge.source;
+            DELETE FROM TC;
+            PERFORM transitive_closure();
+            INSERT INTO tempGraph (SELECT * FROM TC);
+            edgeNotInGraph := (SELECT count(*)
+                                  FROM ((SELECT * FROM edgesRemoved)
                                         EXCEPT
-                                        (SELECT * FROM graph_without_one_vertex)) AS t);
-        without_count := (SELECT count(*) FROM graph_without_one_vertex);
-        not_in_count := (SELECT count(*) FROM edges_not_in_graph);
-        IF not_in_count > without_count AND not_in_except_without > 0 THEN
-          INSERT INTO result VALUES (edge.source);
-        END IF;
-        DELETE FROM edges_not_in_graph;
-        DELETE FROM graph_without_one_vertex;
-        DELETE FROM E;
-        DELETE FROM TC;
-      END LOOP;
-  END;
-$$ LANGUAGE plpgsql;
-
-
-
-
-
-
-
-
-CREATE OR REPLACE FUNCTION articulation() 
-RETURNS TABLE (node integer) AS $$ 
-declare node integer;
-        iter integer;
-        bool int := 0;
-        child integer;
-        childCount int;
-        graphrec graph%rowtype;
-        backupGraphrec backupGraph%rowtype;
-        ogGraphrec oggraph%rowtype;
-        rec record;
-        tcrec tc%rowtype;
-        tmpgraphrec tempGraph%rowtype;
-Begin
-    for node in select distinct val from makesetView
-    LOOP
-        
-        DELETE FROM tempGraph;
-        DELETE FROM ogGraph;
-        DELETE FROM TC2;
-        
-        perform Transitive_Closure();
-        for tcrec in select * from TC
-        LOOP
-            if (tcrec.target <> node and tcrec.source <> node) Then
-                insert into TC2 values(tcrec.source, tcrec.target);
-            end if;
-        end loop;
-        for graphrec in select * from graph
-        LOOP
-            insert into tempgraph values(graphrec.source, graphrec.target);
-        end loop;
-        delete from graph gg where gg.source = node or gg.target = node;
-        perform Transitive_Closure();
-        for tmpgraphrec in select * from tempgraph
-        LOOP
-            insert into graph values(tmpgraphrec.source, tmpgraphrec.target);
-        end loop;
-        for ogGraphrec in select gg.source, gg.target from ogGraph gg LOOP
-            if (node = 1) THEN
-                raise notice '% % %' , node, ogGraphrec.source, ogGraphrec.target;
-            end if;
-        end loop;
-        if (node = 1) THEN
-                raise notice '------' ;
-        end if;
-        for tcrec in select * from TC gg LOOP
-            if (node = 1) THEN
-                raise notice '% % %' , node, tcrec.source, tcrec.target;
-            end if;
-        end loop;
-        if (node = 1) THEN
-                raise notice '------' ;
-        end if;
-        for tcrec in select * from TC2 gg except select * from ogGraph LOOP
-            if (node = 1) THEN
-                raise notice '% % %' , node, tcrec.source, tcrec.target;
-            end if;
-        end loop;
-        if (select exists (select * from TC2 except select * from TC)) Then
-            insert into ArtTable values(node);
-        end if;
-    END LOOP;
-    return query(select distinct * from ArtTable);
-end;
+                                        (SELECT * FROM tempGraph)) AS newTC);
+            counter := (SELECT count(*) FROM tempGraph);
+            countEdges := (SELECT count(*) FROM edgesRemoved);
+            IF countEdges > counter AND edgeNotInGraph > 0 THEN
+            INSERT INTO artPointsRes VALUES (edge.source);
+            END IF;
+            DELETE FROM countEdges;
+            DELETE FROM tempGraph;
+            DELETE FROM E;
+            DELETE FROM TC;
+        END LOOP;
+    END;
 $$ LANGUAGE plpgsql;
 
 select * from articulation();
 
 
-\echo '2 \n'
+\echo '2'
 drop table if exists PC;
 create table PC (
     p integer,
@@ -262,11 +108,7 @@ create table DIST (
     W integer
 );
 
-
---         1
---     2   3   4
---    5 6  7
---    8      
+   
 insert into PC values(1, 2);
 insert into PC values(1, 3);
 insert into PC values(1, 4);
@@ -275,7 +117,6 @@ insert into PC values(2, 6);
 insert into PC values(3, 7);
 insert into PC values(5, 8);
 
---drop function new_ANC_pairs();
 create or replace function new_ANC_pairs()
     returns table (A integer, D integer) AS
     $$
@@ -314,28 +155,8 @@ begin
 end;
 $$ language plpgsql;
 
---select * from pc;
---select Ancestor_Descendant();
---select * from ANC order by A,D;
 
---select distinct d1.y, d2.y from dist d1, dist d2 where d1.w = d2.w and d1.y <> d2.y order by d1.y, d2.y;
-
--- SELECT distinct d1.w as distance_from_root,
---        (SELECT array_agg(d2.y) 
---         FROM dist AS d2
---         WHERE d1.w = d2.w
---        ) AS same_level_people 
--- FROM dist AS d1 order by w;
-
--- select d1.w, d1.y 
--- from dist d1
--- group by grouping SETS ((w), (y));
---SELECT count(d.y) FROM dist d group by w; --order by y;
-
-
-
-
-\echo '3 \n'
+\echo '3'
 drop table if exists A;
 create table A(x INTEGER);
 insert into A values(1);
@@ -353,7 +174,6 @@ returns setof int[][] AS $$
             subval int [];
             emptyset int [] := '{}';
             setofsets int [][];
-            --r int[];
   	begin
         insert into powerSetRelation values(emptyset);
     	for val in select unnest(subset)
@@ -364,13 +184,10 @@ returns setof int[][] AS $$
                 insert into powerSetRelation values(tempSet);
             end loop;
  	    END LOOP;
-    --return QUERY(SELECT * FROM UNNEST(setofsets));
     return query(select x from powerSetRelation order by cardinality(x), x);
     end;
 $$ LANGUAGE plpgsql;
 
---select powerset(array(select x from A));
-----select x from powerSetRelation order by cardinality(x), x;
 
 
 
