@@ -74,23 +74,33 @@
       <item>
 
       <\enumerate-alpha>
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 0>>|<row|<cell|0>|<cell|>>|<row|<cell|1>|<cell|>>>>>
 
-        <item>
+        <tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local Depth
+        2>>|<row|<cell|00>|<cell|0010>>|<row|<cell|01>|<cell|0110>>|<row|<cell|10>|<cell|>>|<row|<cell|11>|<cell|>>>>>
 
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 3>>|<row|<cell|000>|<cell|0001>>|<row|<cell|001>|<cell|0110>>|<row|<cell|010>|<cell|>>|<row|<cell|011>|<cell|0110>>|<row|<cell|>|<cell|0111>>|<row|<cell|100>|<cell|>>|<row|<cell|101>|<cell|>>|<row|<cell|110>|<cell|>>|<row|<cell|111>|<cell|>>>>>
 
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 3>>|<row|<cell|000>|<cell|0001>>|<row|<cell|001>|<cell|0010>>|<row|<cell|010>|<cell|0100>>|<row|<cell|011>|<cell|0110>>|<row|<cell|>|<cell|0111>>|<row|<cell|100>|<cell|1000>>|<row|<cell|101>|<cell|>>|<row|<cell|110>|<cell|>>|<row|<cell|111>|<cell|>>>>>
+
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 3>>|<row|<cell|000>|<cell|0000>>|<row|<cell|001>|<cell|0001>>|<row|<cell|010>|<cell|0010>>|<row|<cell|011>|<cell|0100>>|<row|<cell|>|<cell|0111>>|<row|<cell|100>|<cell|1000>>|<row|<cell|>|<cell|1001>>|<row|<cell|101>|<cell|>>|<row|<cell|110>|<cell|>>|<row|<cell|111>|<cell|>>>>>
       </enumerate-alpha>
 
       <item>
 
       <\enumerate-alpha>
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 3>>|<row|<cell|000>|<cell|0000>>|<row|<cell|001>|<cell|0001>>|<row|<cell|010>|<cell|0100>>|<row|<cell|011>|<cell|0110>>|<row|<cell|>|<cell|0111>>|<row|<cell|100>|<cell|1000>>|<row|<cell|>|<cell|1001>>|<row|<cell|101>|<cell|>>|<row|<cell|110>|<cell|>>|<row|<cell|111>|<cell|>>>>>
 
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 3>>|<row|<cell|000>|<cell|0000>>|<row|<cell|001>|<cell|>>|<row|<cell|010>|<cell|0100>>|<row|<cell|011>|<cell|>>|<row|<cell|100>|<cell|1000>>|<row|<cell|>|<cell|1001>>|<row|<cell|101>|<cell|>>|<row|<cell|110>|<cell|>>|<row|<cell|111>|<cell|>>>>>
 
-        <item>
+        <item><tabular|<tformat|<table|<row|<cell|Global Depth 1>|<cell|Local
+        Depth 2>>|<row|<cell|00>|<cell|>>|<row|<cell|01>|<cell|0100>>|<row|<cell|010>|<cell|1000>>|<row|<cell|011>|<cell|>>>>>
       </enumerate-alpha>
     </enumerate-roman>
 
