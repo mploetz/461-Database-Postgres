@@ -100,37 +100,102 @@
   <section|>
 
   <\enumerate-Alpha>
-    <item>
+    <item><math|B<around*|(|R|)>=1500000/30,B<around*|(|S|)>=5000/10= M=101
+    So using the nested loop alg we get B<around*|(|S|)>+*<around*|(|B<around*|(|R|)>B<around*|(|S|)>/M-1|)>.
+    500+*<around*|(|50000\<cdot\>500/101-1|)>=><with|font-series|bold|250500
+    block IO's>
 
-    <item>
+    <item><math|5\<cdot\><around*|(|B<around*|(|R|)>+B<around*|(|S|)>|)>=5\<cdot\><around*|(|50000+500|)>=<with|font-series|bold|252500
+    block IO<rprime|'>s>>. M1\<gtr\>M2 <math|101\<gtr\>sqrt<around*|(|min<around*|(|B<around*|(|R|)>,B<around*|(|S|)>|)>|)>\<sim\>101\<ngtr\>500.
+    But we ignore this as instructed.>
 
-    <item>
+    <item><math|3\<cdot\><around*|(|50000+500|)>=<with|font-series|bold|151500
+    block IO<rprime|'>s>>
   </enumerate-Alpha>
 
   <section|>
 
   <\enumerate-Alpha>
-    <item>
+    <item>Yes, R1(z)R2(x)R1(x)R2(y)R1(y) eqv.
 
-    <item>
+    <item>Not serializable. Because we write at W2(y) and later come back to
+    read at R1(y) so it is not in chronological order and is a cycle which we
+    cannot have for a schedule.
 
-    <item>
+    <item>No, because we wrote to W2(x) but did not read to it after it
+    before writing again with W1(x). So its overwritten and value was not
+    locked.
   </enumerate-Alpha>
 
   <section|>
 
-  <section|>
+  Let T1=R1(A) W1(A) R1(B) W1(B)
+
+  T2=R2(A) W2(A) R2(B) W2(B)
+
+  T3=R3(B) W3(B) R3(A) W3(A)
+
+  S=R1(A) W1(A) R2(A) W2(A) R1(B) W1(B) R2(B) W2(B) R3(B) W3(B) R3(A) W3(A)
+
+  S1=R1(B) W1(B) R1(A) W1(A) R2(A) W2(A) \ R2(B) W2(B) R3(B) W3(B) R3(A)
+  W3(A)
+
+  S2= R2(A) W2(A) R1(A) W1(A) R1(B) W1(B) R2(B) W2(B) R3(B) W3(B) R3(A) W3(A)
 
   <section|>
+
+  Let T1=R1(A) W1(A) R1(B) W1(B)
+
+  T2=R2(A) W2(A) R2(B) W2(B)
+
+  T3=R3(B) W3(B) R3(A) W3(A)
+
+  S=R1(A) W1(A) R2(A) W2(A) R1(B) W1(B) R2(B) W2(B) R3(B) W3(B) R3(A) W3(A)
+
+  Yes, because since there are no conflictinig pairs then any number of non
+  conflicting swaps and adjacent swaps can transform them to be serial
+  schedules.
+
+  <section|>
+
+  S=R1(A) W1(A) R1(B) W1(B) R1(C) W1(C) R2(A) R2(B) W2(A) W2(B) R2(C) R3(C)
+  W3(A) W3(B) W3(C)
+
+  T1=R1(A)W1(A)R1(B)W1(B)R1(C)W1(C)
+
+  T2=R2(A)R2(B)W2(A)W2(B)R2(C)W2(C)
+
+  T3=R3(A)R3(B)W3(A)W3(B)R3(C)W3(C)
 
   <section|>
 
   <\enumerate-Alpha>
-    <item>
+    <item><math|For schedule <around*|(|T<rsub|1>,T<rsub|2>|)>,A=0 and B=0.
+    After first transaction B=1,since A=0 and we write to B. So we have A=0
+    and B=1. Then we do transaction2 and nothing happens>
 
-    <item>
+    <\math>
+      because B is not 0. So we end up with A=0 and B=1,thus since at least
+      one of the values are 0 the\ 
 
-    <item>
+      the consistency requirement is met.
+    </math>
+
+    <\math>
+      For <around*|(|T<rsub|2>,T<rsub|1>|)> A=0 and B=0,then after
+      T<rsub|2>we get A=1 because B=0 and we increment and write\ 
+
+      to A. Then we go to T<rsub|1> and since A\<neq\>0 nothing changes. So
+      we end up with A=1 and B=1,thus since we have at least on e of the
+      values are 0 then the consistency requirement is met.
+    </math>
+
+    <item><math|S=R1<around*|(|A|)> R2<around*|(|B|)> R1<around*|(|B|)>
+    R2<around*|(|A|)> W1<around*|(|B|)> W2<around*|(|A|)>>
+
+    <item><math|No,because each serial schedule results with T<rsub|1> action
+    and T<rsub|2> action conflict with each other,therefore there cannot be a
+    schedule made non-serial that will be a serializable schedule.>
   </enumerate-Alpha>
 </body>
 
